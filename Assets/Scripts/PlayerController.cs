@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
   [Tooltip("Player's Gameobject rotation speed when changing directions.")]
   [Range(0, Mathf.Infinity)]
   public float rotationSpeed = 360f;
+  [Tooltip("Reference to the child GameObject that contains the Animator component")]
+  public Transform modelTransform;
 
   // Components
   private CharacterController controller;
@@ -27,7 +29,23 @@ public class PlayerController : MonoBehaviour
   {
     gravityInfluence = gravity * Time.deltaTime * -1;
     controller = GetComponent<CharacterController>();
-    animator = GetComponent<Animator>();
+    
+    // Get animator from child model GameObject
+    if (modelTransform != null)
+    {
+      animator = modelTransform.GetComponent<Animator>();
+    }
+    else
+    {
+      // Try to find animator in children if model reference is not set
+      animator = GetComponentInChildren<Animator>();
+      Debug.LogWarning("Model Transform not set. Using GetComponentInChildren to find Animator.");
+    }
+    
+    if (animator == null)
+    {
+      Debug.LogError("Animator component not found in children. Please assign the model GameObject.");
+    }
   }
 
   void Update()
