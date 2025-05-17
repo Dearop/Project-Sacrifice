@@ -255,7 +255,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7625986802508261178, guid: 02a62fcd379ed48638a7239511bb1ae2, type: 3}
+  m_Sprite: {fileID: -2946304336833278909, guid: 35f68aead14b3452e9a94ac53476967b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -284,7 +284,6 @@ GameObject:
   - component: {fileID: 1165457221}
   - component: {fileID: 1165457220}
   - component: {fileID: 1165457219}
-  - component: {fileID: 1165457222}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
