@@ -12,7 +12,92 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96cc3dd6d4cdbfe4b8b34764b5b46cde, type: 3}
   m_Name: song1
   m_EditorClassIdentifier: 
-  songClip: {fileID: 0}
-  bpm: 120
+  songClip: {fileID: 8300000, guid: 153b44d69f1808c4987ed99f5b4c17ef, type: 3}
+  bpm: 140
   numberOfVerticalLanes: 5
-  notes: []
+  notes:
+  - timestamp: 0
+    gameplayType: 0
+    keyToPress1: q
+    keyToPress2: 
+    pitchLevel: 4
+  - timestamp: 0.5
+    gameplayType: 0
+    keyToPress1: w
+    keyToPress2: 
+    pitchLevel: 2
+  - timestamp: 1.25
+    gameplayType: 0
+    keyToPress1: q
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 2
+    gameplayType: 0
+    keyToPress1: r
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 3
+    gameplayType: 0
+    keyToPress1: e
+    keyToPress2: 
+    pitchLevel: 2
+  - timestamp: 4
+    gameplayType: 0
+    keyToPress1: r
+    keyToPress2: 
+    pitchLevel: 1
+  - timestamp: 5
+    gameplayType: 1
+    keyToPress1: q
+    keyToPress2: w
+    pitchLevel: 0
+  - timestamp: 5.1
+    gameplayType: 0
+    keyToPress1: d
+    keyToPress2: 
+    pitchLevel: 0
+  - timestamp: 6
+    gameplayType: 0
+    keyToPress1: w
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 6.23
+    gameplayType: 1
+    keyToPress1: q
+    keyToPress2: e
+    pitchLevel: 1
+  - timestamp: 6.5
+    gameplayType: 0
+    keyToPress1: q
+    keyToPress2: 
+    pitchLevel: 1
+  - timestamp: 8
+    gameplayType: 1
+    keyToPress1: e
+    keyToPress2: q
+    pitchLevel: 3
+  - timestamp: 10
+    gameplayType: 0
+    keyToPress1: q
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 11
+    gameplayType: 0
+    keyToPress1: w
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 11.2
+    gameplayType: 0
+    keyToPress1: r
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 11.3
+    gameplayType: 1
+    keyToPress1: q
+    keyToPress2: e
+    pitchLevel: 3
+  - timestamp: 5
+    gameplayType: 1
+    keyToPress1: r
+    keyToPress2: q
+    pitchLevel: 3

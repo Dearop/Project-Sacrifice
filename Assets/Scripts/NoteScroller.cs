@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro; // Added for TextMeshPro
 using System.Collections.Generic; // For List
+using System.Collections; // For Coroutines
 
 [RequireComponent(typeof(AudioSource))] // Ensure an AudioSource component is present
 public class NoteScroller : MonoBehaviour
@@ -19,6 +20,26 @@ public class NoteScroller : MonoBehaviour
     public RectTransform noteTrack;
     [Tooltip("The UI Panel that acts as the hit zone for notes.")]
     public RectTransform hitZone; // Assign your Hit Zone Panel here
+    [Tooltip("A UI element (e.g., an invisible panel, direct child of NoteTrack) marking the Y position of the TOP-MOST note lane.")]
+    public RectTransform topLaneMarker; // New field
+    [Tooltip("A UI element (e.g., an invisible panel, direct child of NoteTrack) marking the Y position of the BOTTOM-MOST note lane.")]
+    public RectTransform bottomLaneMarker; // New field
+
+    [Header("Timing & Positioning Markers (Child of NoteTrack)")]
+    [Tooltip("A UI element (child of NoteTrack) marking the X-coordinate where notes SPAWN.")]
+    public RectTransform spawnLineMarkerX; // New
+    [Tooltip("A UI element (child of NoteTrack) marking the X-coordinate of the HIT LINE (can be the same as HitZone or a more precise child).")]
+    public RectTransform hitLineMarkerX; // New
+
+    [Header("Countdown Settings")]
+    [Tooltip("The TextMeshPro component to display countdown text.")]
+    public TextMeshProUGUI countdownText;
+    [Tooltip("Initial delay in seconds before the song starts.")]
+    public float initialDelay = 3f;
+    [Tooltip("Time each countdown message is displayed (in seconds).")]
+    public float countdownTextDuration = 0.8f;
+    [Tooltip("Scale animation amount for countdown text.")]
+    public float countdownTextScalePunch = 1.5f;
 
     [Header("Gameplay Settings")]
     [Tooltip("Speed at which notes scroll from right to left.")]
@@ -38,6 +59,8 @@ public class NoteScroller : MonoBehaviour
     private int nextNoteIndex = 0;
     private float timeToReachHitZone = 0f;
     private bool songPlaying = false;
+    private float lastLoggedAudioTime = -1f; // For debug logging audio time
+    private bool countdownActive = false;
 
     private Camera mainCamera; // Cache the main camera
 
@@ -56,14 +79,37 @@ public class NoteScroller : MonoBehaviour
 
         if (currentSong != null && currentSong.songClip != null)
         {
-            // Calculate time for notes to travel from spawn to hit zone center
-            // Assuming notes spawn at noteTrack.rect.width / 2f (right edge if pivot is center)
-            // And hitZone is centered at X=0 within noteTrack's local coordinates.
-            // More robust: calculate distance between spawn point's world X and hit zone's world X.
-            float spawnX = noteTrack.rect.width / 2f;
-            // Let's assume hit zone is at X=0 for simplicity in spawn calculation (adjust if hitZone.anchoredPosition.x is different)
-            float distanceToTravel = spawnX; 
-            timeToReachHitZone = distanceToTravel / scrollSpeed;
+            // --- Calculate timeToReachHitZone using explicit X markers --- 
+            if (spawnLineMarkerX == null || hitLineMarkerX == null)
+            {
+                Debug.LogError("[NoteScroller] SpawnLineMarkerX or HitLineMarkerX is not assigned! Cannot calculate note travel time accurately. Please assign these as children of NoteTrack.");
+                // Fallback or stop, for now, let's make travel time huge so it's obvious
+                timeToReachHitZone = float.MaxValue; 
+            }
+            else if (spawnLineMarkerX.parent != noteTrack || hitLineMarkerX.parent != noteTrack)
+            {
+                 Debug.LogError("[NoteScroller] SpawnLineMarkerX and HitLineMarkerX MUST be direct children of NoteTrack for accurate timing calculations with this method.");
+                 timeToReachHitZone = float.MaxValue;
+            }
+            else
+            {
+                float spawnX_local = spawnLineMarkerX.anchoredPosition.x;
+                float hitX_local = hitLineMarkerX.anchoredPosition.x;
+                float distanceToTravel = Mathf.Abs(spawnX_local - hitX_local);
+                
+                if (scrollSpeed <= 0) 
+                {
+                    Debug.LogError("ScrollSpeed must be greater than 0 for timing calculations.");
+                    timeToReachHitZone = float.MaxValue; 
+                }
+                else
+                {
+                    timeToReachHitZone = distanceToTravel / scrollSpeed;
+                }
+                Debug.Log($"[NoteScroller] TIMING (Explicit Markers): Distance to travel: {distanceToTravel} (using anchoredX of markers within NoteTrack). Time to reach hit zone: {timeToReachHitZone}s. ScrollSpeed: {scrollSpeed}");
+                Debug.Log($"SpawnLineMarkerX.anchoredPosition.x: {spawnX_local}, HitLineMarkerX.anchoredPosition.x: {hitX_local}");
+            }
+            // --- End of new timing calculation ---
             
             StartSong();
         }
@@ -71,54 +117,199 @@ public class NoteScroller : MonoBehaviour
         {    
             Debug.LogError("CurrentSong or its AudioClip is not assigned in NoteScroller.");
         }
+
+        if (topLaneMarker == null || bottomLaneMarker == null)
+        {
+            Debug.LogWarning("TopLaneMarker or BottomLaneMarker is not assigned. Vertical note positioning might use fallback.");
+        }
+
+        // Initialize countdown text        
+        if (countdownText != null)        
+        {            
+            // Make sure we can reference it later, but hide it initially            
+            countdownText.gameObject.SetActive(true);            
+            Debug.Log("[NoteScroller] Countdown text found and initialized.");        
+        }        
+        else        
+        {            
+            Debug.LogWarning("[NoteScroller] Countdown text is not assigned. Will start song without visual countdown.");        
+        }                
+        
+        // Make sure initialDelay is positive        
+        if (initialDelay <= 0)        
+        {            
+            Debug.LogWarning("[NoteScroller] Initial delay is set to 0 or negative. Song will start immediately without countdown.");        
+        }
     }
 
-    public void StartSong()
-    {
-        if (currentSong == null || currentSong.songClip == null) return;
+    public void StartSong()    
+    {        
+        if (currentSong == null || currentSong.songClip == null || timeToReachHitZone == float.MaxValue)         
+        {            
+            if (timeToReachHitZone == float.MaxValue) Debug.LogError("[NoteScroller] Cannot start song, timeToReachHitZone calculation failed due to marker setup.");            
+            return;        
+        }                
+        
+        audioSource.clip = currentSong.songClip;                
+        
+        // Start countdown instead of playing immediately        
+        if (initialDelay > 0)        
+        {            
+            // Reset countdown state to make sure it runs
+            countdownActive = false;
+            StartCoroutine(CountdownAndStartSong());        
+        }        
+        else        
+        {            
+            // If no delay, start immediately            
+            PlaySongImmediately();        
+        }    
+    }
 
-        audioSource.clip = currentSong.songClip;
+    private IEnumerator CountdownAndStartSong()
+    {
+        countdownActive = true;
+        
+        if (countdownText != null)
+        {
+            // Make sure the text is visible
+            countdownText.gameObject.SetActive(true);
+            countdownText.color = new Color(countdownText.color.r, countdownText.color.g, countdownText.color.b, 1f); // Ensure full opacity
+            
+            Debug.Log("[NoteScroller] Countdown started - Ready");
+            // Show "Ready"
+            countdownText.text = "Ready";
+            yield return AnimateCountdownText();
+            
+            Debug.Log("[NoteScroller] Countdown - Set");
+            // Show "Set"
+            countdownText.text = "Set";  
+            yield return AnimateCountdownText();
+            
+            Debug.Log("[NoteScroller] Countdown - Go!");
+            // Show "Go"
+            countdownText.text = "Go!";
+            yield return AnimateCountdownText();
+            
+            countdownText.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("[NoteScroller] Countdown text is null, using time delay only");
+            // If no countdown text is assigned, just wait for the delay
+            yield return new WaitForSeconds(initialDelay);
+        }
+        
+        Debug.Log("[NoteScroller] Countdown finished, starting song");
+        PlaySongImmediately();
+        countdownActive = false;
+    }
+    
+    private IEnumerator AnimateCountdownText()
+    {
+        if (countdownText != null)
+        {
+            // Simple scale punch animation
+            Vector3 originalScale = countdownText.transform.localScale;
+            Vector3 targetScale = originalScale * countdownTextScalePunch;
+            
+            float elapsedTime = 0f;
+            float halfDuration = countdownTextDuration * 0.5f;
+            
+            // Scale up
+            while (elapsedTime < halfDuration)
+            {
+                float t = elapsedTime / halfDuration;
+                countdownText.transform.localScale = Vector3.Lerp(originalScale, targetScale, t);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            elapsedTime = 0f;
+            
+            // Scale down
+            while (elapsedTime < halfDuration)
+            {
+                float t = elapsedTime / halfDuration;
+                countdownText.transform.localScale = Vector3.Lerp(targetScale, originalScale, t);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            
+            // Ensure we end at original scale
+            countdownText.transform.localScale = originalScale;
+            
+            // Wait any remaining time
+            if (countdownTextDuration > 0)
+            {
+                yield return new WaitForSeconds(countdownTextDuration - (halfDuration * 2));
+            }
+        }
+        else
+        {
+            yield return new WaitForSeconds(countdownTextDuration);
+        }
+    }
+    
+    private void PlaySongImmediately()
+    {
         audioSource.Play();
-        songStartTime = Time.time;
         nextNoteIndex = 0;
         songPlaying = true;
-        Debug.Log($"Starting song: {currentSong.name}. Time to reach hit zone: {timeToReachHitZone}s");
+        lastLoggedAudioTime = -1f; // Reset for new song
     }
 
     void Update()
     {
-        if (!songPlaying || currentSong == null) 
+        if (!songPlaying || currentSong == null || audioSource == null) 
         {
-            // Remove test spawning if a song is meant to be playing
-            // if (Input.GetKeyDown(KeyCode.Alpha1)) SpawnSingleNote("S", 0);
-            // if (Input.GetKeyDown(KeyCode.Alpha2)) SpawnDoubleNote("D", "F", 1);
             return;
         }
 
-        float currentSongTime = Time.time - songStartTime;
+        // Check if song actually finished playing
+        if (!audioSource.isPlaying && audioSource.time >= audioSource.clip.length - 0.1f) // Check if near or at the end
+        {
+            songPlaying = false;
+            Debug.Log("[NoteScroller] Song finished playing based on audioSource state.");
+            return;
+        }
+        if (!audioSource.isPlaying && nextNoteIndex >= currentSong.notes.Count) // All notes spawned and audio stopped
+        {
+             songPlaying = false;
+             Debug.Log("[NoteScroller] Song finished: All notes spawned and audio source stopped.");
+             return;
+        }
 
-        // Spawn notes based on song data
+        float currentSongTime = audioSource.time; // Use AudioSource's time directly
+
+        // Optional: Log audio time periodically to check if it's advancing
+        if (Time.frameCount % 300 == 0 && currentSongTime != lastLoggedAudioTime) // Log every 5 seconds approx if time changed
+        {
+            Debug.Log($"[NoteScroller] Audio time: {currentSongTime:F2}s");
+            lastLoggedAudioTime = currentSongTime;
+        }
+
         while (nextNoteIndex < currentSong.notes.Count)
         {
             SongNoteInfo noteInfo = currentSong.notes[nextNoteIndex];
-            float noteHitTime = noteInfo.timestamp;
-            float noteSpawnTime = noteHitTime - timeToReachHitZone;
-
-            if (currentSongTime >= noteSpawnTime)
+            float noteHitTime = noteInfo.timestamp; // This is when the note should be AT the hit zone
+            
+            // FIXED: Spawn notes at the actual hit time - this will make them spawn at the hit line
+            // and then we'll immediately position them at the spawn point
+            if (currentSongTime >= noteHitTime)
             {
-                if (noteInfo.gameplayType == NoteGameplayType.Single)
-                {
-                    SpawnSingleNote(noteInfo.keyToPress1, noteInfo.pitchLevel);
-                }
-                else // Double
-                {
-                    SpawnDoubleNote(noteInfo.keyToPress1, noteInfo.keyToPress2, noteInfo.pitchLevel);
-                }
+                Debug.Log($"[NoteScroller] Spawning note. Hit Time: {noteHitTime:F2}s. Current Audio Time: {currentSongTime:F2}s. Key: {noteInfo.keyToPress1}");
+                
+                // Determine which prefab to use based on gameplayType
+                GameObject prefabToUse = (noteInfo.gameplayType == NoteGameplayType.Single) ? singleNotePrefab : doubleNotePrefab;
+                bool isDouble = (noteInfo.gameplayType == NoteGameplayType.Double);
+                string key2 = isDouble ? noteInfo.keyToPress2 : null;
+
+                SpawnAndPositionNote(prefabToUse, isDouble, noteInfo.keyToPress1, noteInfo.pitchLevel, key2);
                 nextNoteIndex++;
             }
             else
             {
-                // Notes are sorted, so if this one isn't ready, subsequent ones won't be either
                 break; 
             }
         }
@@ -255,20 +446,56 @@ public class NoteScroller : MonoBehaviour
 
         if (noteRectTransform != null && noteData != null)
         {
-            float startX = noteTrack.rect.width / 2f;
-            
-            // Calculate Y position based on pitchLevel and numberOfVerticalLanes from currentSong
+            // Horizontal Spawn Position: Always position notes directly at the hit line
+            float hitX;
+            if (hitLineMarkerX != null && hitLineMarkerX.parent == noteTrack) 
+            {
+                hitX = spawnLineMarkerX.anchoredPosition.x;
+            }
+            else
+            {
+                // Fallback if hitLineMarkerX isn't set up correctly
+                hitX = 0; // Center of the track
+            }
+
             float yPos = 0f;
             int numLanes = currentSong.numberOfVerticalLanes;
-            if (numLanes > 1)
-            {
-                // Ensure pitchLevel is within valid range (0 to numLanes - 1)
-                int clampedPitchLevel = Mathf.Clamp(pitchLevel, 0, numLanes - 1);
-                yPos = Mathf.Lerp(-noteTrack.rect.height / 2f, noteTrack.rect.height / 2f, (float)clampedPitchLevel / (numLanes - 1));
-            }
-            // If numLanes is 1, yPos remains 0 (center).
 
-            noteRectTransform.anchoredPosition = new Vector2(startX, yPos);
+            if (topLaneMarker != null && bottomLaneMarker != null)
+            {
+                Vector3 noteTrackPivotWorldPos = noteTrack.position;
+                Vector3 topMarkerWorldPos = topLaneMarker.position;
+                Vector3 bottomMarkerWorldPos = bottomLaneMarker.position;
+                Vector3 topReferenceWorld = new Vector3(noteTrackPivotWorldPos.x, topMarkerWorldPos.y, noteTrackPivotWorldPos.z);
+                Vector3 bottomReferenceWorld = new Vector3(noteTrackPivotWorldPos.x, bottomMarkerWorldPos.y, noteTrackPivotWorldPos.z);
+                float minY_local = noteTrack.InverseTransformPoint(bottomReferenceWorld).y;
+                float maxY_local = noteTrack.InverseTransformPoint(topReferenceWorld).y;
+                
+                if (maxY_local < minY_local)
+                {
+                    (minY_local, maxY_local) = (maxY_local, minY_local); 
+                }
+
+                if (numLanes > 1)
+                {
+                    int clampedPitchLevel = Mathf.Clamp(pitchLevel, 0, numLanes - 1);
+                    yPos = Mathf.Lerp(minY_local, maxY_local, (float)clampedPitchLevel / (numLanes - 1));
+                }
+                else 
+                {
+                    yPos = (minY_local + maxY_local) / 2f;
+                }
+            }
+            else
+            {
+                if (numLanes > 1)
+                {
+                    int clampedPitchLevel = Mathf.Clamp(pitchLevel, 0, numLanes - 1);
+                    yPos = Mathf.Lerp(-noteTrack.rect.height / 2f, noteTrack.rect.height / 2f, (float)clampedPitchLevel / (numLanes - 1));
+                }
+            }
+
+            noteRectTransform.anchoredPosition = new Vector2(hitX, yPos);
             
             TextMeshProUGUI tm1 = null, tm2 = null;
             TextMeshProUGUI[] texts = newNoteObject.GetComponentsInChildren<TextMeshProUGUI>(true); 
@@ -346,18 +573,6 @@ public class NoteScroller : MonoBehaviour
                     PlayParticleEffectAtRectTransform(failParticlePrefab, overallNoteRectForFail, particleSpawnDepth);
                 }
 
-                if (firstPartHitForDouble && !alreadyValidated) 
-                {
-                    Debug.Log($"Double note {noteData.letter1}-{noteData.letter2} scrolled off after first hit (second part missed).");
-                }
-                else if (noteData.isDoubleNote && !firstPartHitForDouble && !alreadyValidated) 
-                {
-                     Debug.Log($"Double note {noteData.letter1}-{noteData.letter2} scrolled off (completely missed).");
-                }
-                else if (!noteData.isDoubleNote && !alreadyValidated)
-                {
-                    Debug.Log($"Single note {noteData.letter1} scrolled off (missed).");
-                }
                 Destroy(noteData.gameObject);
                 activeNotes.RemoveAt(i);
             }
