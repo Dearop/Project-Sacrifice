@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
   // Components
   private CharacterController controller;
   private Animator animator;
+  private DrunkEffect drunkEffect;
 
   // Attributes
   private bool isWalking = false;
@@ -29,6 +30,7 @@ public class PlayerController : MonoBehaviour
   {
     gravityInfluence = gravity * Time.deltaTime * -1;
     controller = GetComponent<CharacterController>();
+    drunkEffect = GetComponent<DrunkEffect>();
     
     // Get animator from child model GameObject
     if (modelTransform != null)
@@ -65,6 +67,14 @@ public class PlayerController : MonoBehaviour
     float horizontalAxis = Input.GetAxis("Horizontal");
     float verticalAxis = Input.GetAxis("Vertical");
 
+    // Flip controls if drunk
+    if (drunkEffect != null && drunkEffect.IsDrunk())
+    {
+      Debug.Log("Controls are flipped due to drunk effect");
+      horizontalAxis = -horizontalAxis;
+      verticalAxis = -verticalAxis;
+    }
+
     movement = new Vector3(horizontalAxis, gravityInfluence, verticalAxis);
   }
 
@@ -79,7 +89,6 @@ public class PlayerController : MonoBehaviour
       Quaternion toRotation = Quaternion.LookRotation(movement);
       transform.rotation = Quaternion.RotateTowards(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
     }
-
   }
 
   private void AnimationManagement()
