@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      wood_floor_deck_disp_4k_0: 8861533443157257887
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
