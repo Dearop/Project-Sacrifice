@@ -1,0 +1,22 @@
+# How to Make the Piano Prefab Load PianoScene on Interaction
+
+1. **Add the PianoInteractionLoader Script**
+   - In the Project window, go to `Assets/Scripts/` and find the `PianoInteractionLoader.cs` script.
+
+2. **Assign the Script to the Piano Prefab**
+   - Locate your Piano prefab in the Project window (e.g., in `Assets/Prefabs/` or similar).
+   - Drag the Piano prefab into the Hierarchy to edit it, or open it in Prefab Mode.
+   - With the Piano prefab selected, click `Add Component` in the Inspector and add the `PianoInteractionLoader` script.
+   - Ensure the `Piano Scene Name` field is set to `PianoScene` (or the exact name of your piano scene file).
+
+3. **Connect the Interaction**
+   - If you are using an interaction system (like a button press or proximity trigger), make sure it calls the `Interact()` method on the `PianoInteractionLoader` component when the player interacts with the piano.
+   - If your Piano prefab has a UnityEvent (such as on an Interactable component), add the Piano prefab to the event's object field and select `PianoInteractionLoader -> Interact()` as the function to call.
+
+4. **Test the Transition**
+   - Enter Play Mode and interact with the Piano in the BarScene.
+   - The game should load the PianoScene when the interaction occurs.
+
+**Note:**
+- Make sure the PianoScene is added to your Build Settings (File > Build Settings > Scenes In Build).
+- You can use this approach for any other interactable object that should trigger a scene change. 
