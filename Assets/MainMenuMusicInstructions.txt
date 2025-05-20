@@ -1,0 +1,25 @@
+# How to Add Background Music to MainMenuScene
+
+1. **Import the Audio File**
+   - Drag `Theseus's Ship_1.mp3` into your Unity project (e.g., into `Assets/Audio/Music/`).
+
+2. **Add the Music Player Script**
+   - In the Project window, go to `Assets/Scripts/` and find the `MainMenuMusicPlayer.cs` script.
+
+3. **Create the Music Player GameObject**
+   - In the MainMenuScene, right-click in the Hierarchy and select `Create Empty`.
+   - Name the new GameObject `MainMenuMusicPlayer`.
+   - With this GameObject selected, click `Add Component` in the Inspector and add the `MainMenuMusicPlayer` script.
+
+4. **Assign the AudioClip**
+   - In the Inspector, you will see a field called `Music Clip` in the `MainMenuMusicPlayer` component.
+   - Drag your `Theseus's Ship_1.mp3` file from the Project window into this field.
+   - Adjust the `Volume` field if desired (default is 0.5).
+
+5. **Test the Music**
+   - Enter Play Mode in the MainMenuScene. You should hear the music play and loop.
+   - When you leave the MainMenuScene (e.g., load another scene), the music will stop automatically.
+
+**Note:**
+- Do not mark the GameObject as `DontDestroyOnLoad`. This ensures the music only plays in the MainMenuScene.
+- You can use this same approach for other scenes by creating similar music player GameObjects and scripts as needed. 

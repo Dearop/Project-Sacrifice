@@ -16,7 +16,10 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private KeyCode startKey = KeyCode.E;
     
     [Header("Dialogue Settings")]
-    [SerializeField, TextArea(3, 10)] private string introDialogue = "Your mother just passed away and you found her notebook... It has a single melody she used to play for you when you were young, it seems lost to you now though. The local bar had a piano you could use, go play the melody...";
+    [SerializeField, TextArea(3, 10)] private string introDialogue = "Your mother is gone. In the quiet aftermath, you discover her old notebook—its pages worn, her handwriting gentle and familiar.\n\n" +
+    "There, among memories, you find a single melody. She played it for you when you were young, a song now lost to time and grief.\n\n" +
+    "But hope lingers. The local bar still has a piano, waiting in the dim light.\n\n" +
+    "Go. Play her melody. Remember.";
     
     private bool mainMenuActive = true;
     private bool dialogueActive = false;
