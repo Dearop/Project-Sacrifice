@@ -1,0 +1,57 @@
+# Main Menu Implementation Instructions
+
+## Overview
+This document provides step-by-step instructions to implement:
+1. A blinking "Press E to Start" text on the MainMenuScene
+2. A transition to a black screen with dialogue when E is pressed
+3. A transition to the BarScene when E is pressed again
+
+## Step 1: Create UI Elements in MainMenuScene
+1. Open the MainMenuScene in Unity
+2. Right-click on the MainMenuCanvas in the Hierarchy and select UI > Text - TextMeshPro
+3. Name it "PressEToStartText"
+4. Position it at the bottom of the screen (suggested position: y = -300)
+5. Set the text to "Press E to Start"
+6. Set the font size to 50 and alignment to center
+7. Create a new empty GameObject as a child of MainMenuCanvas and name it "DialoguePanel"
+8. Add a CanvasRenderer and Image component to DialoguePanel
+9. Set the Image color to black with Alpha = 1 (fully opaque)
+10. Set the RectTransform to stretch in all directions (Anchor Presets: stretch-stretch)
+11. Add a Text - TextMeshPro component as a child of DialoguePanel
+12. Name it "DialogueText"
+13. Set the RectTransform to center with appropriate width and height (e.g., 1200x600)
+14. Set the font size to 36, alignment to center, and text color to white
+15. Make sure DialoguePanel is disabled by default (uncheck the checkbox next to its name in the Inspector)
+
+## Step 2: Add the MainMenuManager Script
+1. Create a new empty GameObject in the MainMenuScene and name it "MainMenuManager"
+2. Add the MainMenuManager script to this GameObject
+3. Assign the references in the Inspector:
+   - Press E To Start Text: Assign the PressEToStartText object
+   - Dialogue Panel: Assign the DialoguePanel object
+   - Dialogue Text: Assign the DialogueText object
+4. Verify that the Bar Scene Name is set to "BarScene" (or the exact name of your bar scene file)
+5. Customize the Intro Dialogue text if desired
+
+## Step 3: Update Build Settings
+1. Open Build Settings (File > Build Settings)
+2. Add the MainMenuScene and BarScene to the Scenes in Build list
+3. Make sure MainMenuScene is at index 0 (or set it as the active scene)
+
+## Step 4: Test the Implementation
+1. Enter Play Mode in the Unity Editor
+2. Verify that "Press E to Start" text blinks at the bottom of the screen
+3. Press E to see the dialogue screen with the story text
+4. Press E again to transition to the BarScene
+
+## Troubleshooting
+- If the text doesn't blink, check that the PressEToStartText is properly assigned in the MainMenuManager
+- If the dialogue doesn't appear, ensure DialoguePanel and DialogueText are properly set up and assigned
+- If the scene doesn't transition to BarScene, verify that the scene name is correct and the scene is included in the Build Settings
+
+## Notes
+- The MainMenuManager.cs script handles all the functionality including:
+  - Blinking text effect
+  - Showing dialogue when E is pressed
+  - Loading the BarScene when E is pressed again
+- No modifications to the BarScene are needed as specified in the requirements 
