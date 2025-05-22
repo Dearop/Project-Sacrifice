@@ -11,6 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/BarScene.unity
     guid: 287e967869e054440ba8b49ab03d9a20
+  - enabled: 1
+    path: Assets/Scenes/PianoScene.unity
+    guid: ee9f232c333efdd4bafd7edf5377fb53
+  - enabled: 1
+    path: Assets/Scenes/EndScene.unity
+    guid: c1334d55457674c4abb7d8eca83e6dc3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   songClip: {fileID: 8300000, guid: 153b44d69f1808c4987ed99f5b4c17ef, type: 3}
   bpm: 140
-  numberOfVerticalLanes: 5
+  numberOfVerticalLanes: 6
   notes:
   - timestamp: 0
     gameplayType: 0
@@ -51,25 +51,20 @@ MonoBehaviour:
     keyToPress1: q
     keyToPress2: w
     pitchLevel: 0
-  - timestamp: 5.1
+  - timestamp: 6
     gameplayType: 0
     keyToPress1: d
     keyToPress2: 
     pitchLevel: 0
-  - timestamp: 6
+  - timestamp: 6.25
     gameplayType: 0
     keyToPress1: w
     keyToPress2: 
     pitchLevel: 3
-  - timestamp: 6.23
+  - timestamp: 6.5
     gameplayType: 1
     keyToPress1: q
     keyToPress2: e
-    pitchLevel: 1
-  - timestamp: 6.5
-    gameplayType: 0
-    keyToPress1: q
-    keyToPress2: 
     pitchLevel: 1
   - timestamp: 8
     gameplayType: 1
@@ -80,24 +75,54 @@ MonoBehaviour:
     gameplayType: 0
     keyToPress1: q
     keyToPress2: 
-    pitchLevel: 3
+    pitchLevel: 5
   - timestamp: 11
     gameplayType: 0
     keyToPress1: w
     keyToPress2: 
-    pitchLevel: 3
-  - timestamp: 11.2
+    pitchLevel: 2
+  - timestamp: 11.5
     gameplayType: 0
     keyToPress1: r
     keyToPress2: 
-    pitchLevel: 3
-  - timestamp: 11.3
+    pitchLevel: 5
+  - timestamp: 12
     gameplayType: 1
     keyToPress1: q
     keyToPress2: e
     pitchLevel: 3
-  - timestamp: 5
+  - timestamp: 13
     gameplayType: 1
     keyToPress1: r
     keyToPress2: q
     pitchLevel: 3
+  - timestamp: 14
+    gameplayType: 1
+    keyToPress1: s
+    keyToPress2: d
+    pitchLevel: 7
+  - timestamp: 14.75
+    gameplayType: 1
+    keyToPress1: a
+    keyToPress2: w
+    pitchLevel: 1
+  - timestamp: 16
+    gameplayType: 0
+    keyToPress1: a
+    keyToPress2: 
+    pitchLevel: 1
+  - timestamp: 16.5
+    gameplayType: 0
+    keyToPress1: r
+    keyToPress2: 
+    pitchLevel: 3
+  - timestamp: 17.5
+    gameplayType: 1
+    keyToPress1: r
+    keyToPress2: e
+    pitchLevel: 5
+  - timestamp: 19
+    gameplayType: 1
+    keyToPress1: r
+    keyToPress2: e
+    pitchLevel: 7

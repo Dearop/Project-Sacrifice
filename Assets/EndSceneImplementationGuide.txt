@@ -1,0 +1,99 @@
+# End Scene Implementation Guide
+
+## Overview
+This guide will help you implement:
+1. A transition from the PianoScene to the EndScene after the piano minigame is completed
+2. An EndScene with a black background, "Thanks for Playing" text, and the same music as MainMenuScene
+
+## Part 1: Setting Up Piano Game Completion Transition
+
+1. **Add the PianoGameCompleteManager to PianoScene**
+   - Open the PianoScene in Unity
+   - Create an empty GameObject named "GameManager" or similar
+   - Add the "PianoGameCompleteManager" script to this GameObject
+   - Make sure the "End Scene Name" field is set to "EndScene"
+   - Adjust the "Delay Before Transition" if needed (default is 2 seconds)
+
+2. **Connect NoteScroller to PianoGameCompleteManager**
+   - In the PianoScene, find the GameObject with the NoteScroller component (likely named "NoteScollManager")
+   - In the Inspector, find the "Game Completion" section of the NoteScroller component
+   - Drag the GameManager object (with PianoGameCompleteManager) into the "Game Complete Manager" field
+   - Adjust the "End Delay" if needed (default is 2 seconds - this is additional time after the song ends before triggering completion)
+
+3. **How the Game Completion Detection Works**
+   - The NoteScroller now automatically detects when:
+     a) The song audio has finished playing
+     b) All notes have been processed (spawned)
+     c) No active notes remain on screen
+     d) The specified end delay time has passed
+   - When all these conditions are met, it calls the OnGameComplete() method on the PianoGameCompleteManager
+   - The PianoGameCompleteManager then waits for its own delay time before loading the EndScene
+
+## Part 2: Creating the End Scene
+
+1. **Create a New Scene**
+   - In Unity, go to File > New Scene
+   - Save it as "EndScene" in your Scenes folder
+
+2. **Set Up the Scene Background**
+   - Create a Canvas (right-click in Hierarchy > UI > Canvas)
+   - Add an Image component to the Canvas (right-click Canvas > UI > Image)
+   - Resize the Image to cover the entire screen (set Anchors to stretch-stretch)
+   - Set the Image color to black
+
+3. **Add Text Elements**
+   - Create a Text - TextMeshPro object as a child of the Canvas (right-click Canvas > UI > Text - TextMeshPro)
+   - Name it "ThanksText"
+   - Position it near the top of the screen
+   - Set its font size, alignment, and color as desired
+   
+   - Create another Text - TextMeshPro object
+   - Name it "CreditsText"
+   - Position it below the ThanksText
+   - Set its font size, alignment, and color as desired
+
+4. **Add End Scene Manager**
+   - Create an empty GameObject named "EndSceneManager"
+   - Add the "EndSceneManager" script to it
+   - Assign the ThanksText and CreditsText to their respective fields
+   - Customize the thanks and credits messages as desired
+
+5. **Set Up Music**
+   - In the Inspector for EndSceneManager, locate the "End Music" field
+   - Drag the same music file you used in the MainMenuScene into this field
+   - Adjust the volume if needed
+
+## Part 3: Update Build Settings
+
+1. **Add EndScene to Build Settings**
+   - Go to File > Build Settings
+   - Make sure EndScene is added to the Scenes in Build list
+   - If not, click "Add Open Scenes" while EndScene is open
+
+2. **Organize Scene Order**
+   - Make sure your scenes are in the correct order:
+     1. MainMenuScene
+     2. BarScene
+     3. PianoScene
+     4. EndScene
+
+## Testing Your Implementation
+
+1. **Test from PianoScene**
+   - Enter Play Mode in the PianoScene
+   - Play through the piano minigame (or wait for the song to end)
+   - After the song ends and all notes have been processed, the EndScene should load automatically
+
+2. **Check EndScene**
+   - Verify that the black background appears
+   - Confirm that the "Thanks for Playing" text is visible
+   - Ensure the same music from MainMenuScene is playing
+
+## Troubleshooting
+
+- If the EndScene doesn't load after the piano minigame:
+  - Check that the NoteScroller has a reference to the PianoGameCompleteManager
+  - Verify that the song is actually ending (check the console for "Piano minigame complete" message)
+  - Make sure the EndScene name is spelled correctly and included in the Build Settings
+- If music isn't playing, verify that the same AudioClip is assigned to both the MainMenuMusicPlayer and the EndSceneManager
+- If text is not displaying correctly, check the Canvas Scaler settings and text component properties 

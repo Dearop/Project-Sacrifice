@@ -208,7 +208,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 740, y: -8}
+  m_AnchoredPosition: {x: 740, y: -17}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &158787083
@@ -1672,7 +1672,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -573.4696, y: 7.308716}
+  m_AnchoredPosition: {x: -573.4696, y: -47}
   m_SizeDelta: {x: 1, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &886272816
@@ -1684,8 +1684,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 886272818}
-  - component: {fileID: 886272817}
   - component: {fileID: 886272819}
+  - component: {fileID: 886272820}
   m_Layer: 0
   m_Name: NoteScollManager
   m_TagString: Untagged
@@ -1693,35 +1693,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &886272817
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 886272816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 665c148681fd6a34fb67cc054aa35770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentSong: {fileID: 11400000, guid: ce47809d5093fbd4b94bcd4b460f07fa, type: 2}
-  singleNotePrefab: {fileID: 117354716228411910, guid: 144cfe703ee6d244997b8de14805f14d, type: 3}
-  doubleNotePrefab: {fileID: 117354716228411910, guid: 7af789fa4ab5d8f43a15870419a9acf7, type: 3}
-  noteTrack: {fileID: 923223362}
-  hitZone: {fileID: 1124733541}
-  topLaneMarker: {fileID: 776731972}
-  bottomLaneMarker: {fileID: 1693654047}
-  spawnLineMarkerX: {fileID: 125129852}
-  hitLineMarkerX: {fileID: 644965092}
-  countdownText: {fileID: 218689357}
-  initialDelay: 10
-  countdownTextDuration: 1.5
-  countdownTextScalePunch: 1.5
-  scrollSpeed: 200
-  successParticlePrefab: {fileID: 4503040899462706747, guid: 671f7973f61a531419db4e51e91ad040, type: 3}
-  failParticlePrefab: {fileID: 4503040899462706747, guid: 70248979c98fee8408648ca6143ff993, type: 3}
-  particleSpawnDepth: 10
 --- !u!4 &886272818
 Transform:
   m_ObjectHideFlags: 0
@@ -1834,6 +1805,38 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &886272820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886272816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 596985c4d320f43599a97e65bdb960b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentSong: {fileID: 11400000, guid: ce47809d5093fbd4b94bcd4b460f07fa, type: 2}
+  singleNotePrefab: {fileID: 117354716228411910, guid: 144cfe703ee6d244997b8de14805f14d, type: 3}
+  doubleNotePrefab: {fileID: 117354716228411910, guid: 7af789fa4ab5d8f43a15870419a9acf7, type: 3}
+  noteTrack: {fileID: 923223362}
+  hitZone: {fileID: 1124733541}
+  topLaneMarker: {fileID: 776731972}
+  bottomLaneMarker: {fileID: 1693654047}
+  spawnLineMarkerX: {fileID: 125129852}
+  hitLineMarkerX: {fileID: 644965092}
+  countdownText: {fileID: 218689357}
+  initialDelay: 8
+  countdownTextDuration: 0.8
+  countdownTextScalePunch: 1.5
+  scrollSpeed: 200
+  minTimeBetweenNotes: 0.5
+  successParticlePrefab: {fileID: 4503040899462706747, guid: 671f7973f61a531419db4e51e91ad040, type: 3}
+  failParticlePrefab: {fileID: 4503040899462706747, guid: 70248979c98fee8408648ca6143ff993, type: 3}
+  particleSpawnDepth: 10
+  gameCompleteManager: {fileID: 1790582335}
+  endDelay: 2
 --- !u!1 &923223361
 GameObject:
   m_ObjectHideFlags: 0
@@ -2926,6 +2929,53 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a895dce9eba281745a6f803351502abd, type: 3}
+--- !u!1 &1790582334
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1790582336}
+  - component: {fileID: 1790582335}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1790582335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790582334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  endSceneName: EndScene
+  delayBeforeTransition: 0
+  gameCompleted: 0
+--- !u!4 &1790582336
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790582334}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.820152, y: 2.0399067, z: 14.112169}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1849416535
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3374,3 +3424,4 @@ SceneRoots:
   - {fileID: 462390030}
   - {fileID: 1924658463}
   - {fileID: 401529933}
+  - {fileID: 1790582336}

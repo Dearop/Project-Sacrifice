@@ -1,11 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro; // Added for TextMeshPro
-using System.Collections.Generic; // For List
-using System.Collections; // For Coroutines
+using TMPro;
 
 [RequireComponent(typeof(AudioSource))] // Ensure an AudioSource component is present
-public class NoteScroller : MonoBehaviour
+public class FixedNoteScroller : MonoBehaviour
 {
     [Header("Song Configuration")]
     [Tooltip("The SongData asset containing the notes and audio for the current song.")]
@@ -44,6 +43,8 @@ public class NoteScroller : MonoBehaviour
     [Header("Gameplay Settings")]
     [Tooltip("Speed at which notes scroll from right to left.")]
     public float scrollSpeed = 200f;
+    [Tooltip("Minimum time between spawning notes to prevent clustering")]
+    public float minTimeBetweenNotes = 0.1f;
 
     [Header("Effects")]
     [Tooltip("Particle system to play on successful note hit.")]
@@ -69,6 +70,7 @@ public class NoteScroller : MonoBehaviour
     private bool countdownActive = false;
     private bool gameCompleted = false;
     private float songEndTime = 0f;
+    private static float lastNoteSpawnTime = 0f;
 
     private Camera mainCamera; // Cache the main camera
 
@@ -208,43 +210,52 @@ public class NoteScroller : MonoBehaviour
             yield return new WaitForSeconds(initialDelay);
         }
         
-        Debug.Log("[NoteScroller] Countdown finished, starting song");
+        // After countdown, start the song
         PlaySongImmediately();
         countdownActive = false;
     }
     
     private IEnumerator AnimateCountdownText()
     {
-        if (countdownText != null)
+        if (countdownText == null)
         {
-            // Simple scale punch animation
-            Vector3 originalScale = countdownText.transform.localScale;
-            Vector3 targetScale = originalScale * countdownTextScalePunch;
+            yield return new WaitForSeconds(countdownTextDuration);
+            yield break;
+        }
+        
+        float startScale = 1.0f;
+        float endScale = countdownTextScalePunch;
+        float halfDuration = countdownTextDuration / 2f;
+        
+        // Animate scale up
+        Vector3 originalScale = countdownText.transform.localScale;
+        
+        if (halfDuration > 0)
+        {
+            float startTime = Time.time;
+            float endTime = startTime + halfDuration;
             
-            float elapsedTime = 0f;
-            float halfDuration = countdownTextDuration * 0.5f;
-            
-            // Scale up
-            while (elapsedTime < halfDuration)
+            while (Time.time < endTime)
             {
-                float t = elapsedTime / halfDuration;
-                countdownText.transform.localScale = Vector3.Lerp(originalScale, targetScale, t);
-                elapsedTime += Time.deltaTime;
+                float normalizedTime = (Time.time - startTime) / halfDuration;
+                float currentScale = Mathf.Lerp(startScale, endScale, normalizedTime);
+                countdownText.transform.localScale = originalScale * currentScale;
                 yield return null;
             }
             
-            elapsedTime = 0f;
+            // Animate scale down
+            startTime = Time.time;
+            endTime = startTime + halfDuration;
             
-            // Scale down
-            while (elapsedTime < halfDuration)
+            while (Time.time < endTime)
             {
-                float t = elapsedTime / halfDuration;
-                countdownText.transform.localScale = Vector3.Lerp(targetScale, originalScale, t);
-                elapsedTime += Time.deltaTime;
+                float normalizedTime = (Time.time - startTime) / halfDuration;
+                float currentScale = Mathf.Lerp(endScale, startScale, normalizedTime);
+                countdownText.transform.localScale = originalScale * currentScale;
                 yield return null;
             }
             
-            // Ensure we end at original scale
+            // Reset to original scale
             countdownText.transform.localScale = originalScale;
             
             // Wait any remaining time
@@ -290,15 +301,14 @@ public class NoteScroller : MonoBehaviour
             }
         }
         
-        // Spawn notes based on song time
+        // Spawn notes based on song time with buffer to prevent clustering
         while (nextNoteIndex < currentSong.notes.Count && songPlaying)
         {
             SongNoteInfo noteInfo = currentSong.notes[nextNoteIndex];
             float noteHitTime = noteInfo.timestamp; // This is when the note should be AT the hit zone
             
-            // FIXED: Spawn notes at the actual hit time - this will make them spawn at the hit line
-            // and then we'll immediately position them at the spawn point
-            if (currentSongTime >= noteHitTime)
+            // Add buffer time to prevent notes from spawning too close together
+            if (currentSongTime >= noteHitTime && Time.time >= lastNoteSpawnTime + minTimeBetweenNotes)
             {
                 Debug.Log($"[NoteScroller] Spawning note. Hit Time: {noteHitTime:F2}s. Current Audio Time: {currentSongTime:F2}s. Key: {noteInfo.keyToPress1}");
                 
@@ -309,6 +319,7 @@ public class NoteScroller : MonoBehaviour
 
                 SpawnAndPositionNote(prefabToUse, isDouble, noteInfo.keyToPress1, noteInfo.pitchLevel, key2);
                 nextNoteIndex++;
+                lastNoteSpawnTime = Time.time;
             }
             else
             {
@@ -481,16 +492,16 @@ public class NoteScroller : MonoBehaviour
 
         if (noteRectTransform != null && noteData != null)
         {
-            // Horizontal Spawn Position: Always position notes directly at the hit line
-            float hitX;
-            if (hitLineMarkerX != null && hitLineMarkerX.parent == noteTrack) 
+            // Horizontal Spawn Position: Use the spawn line marker
+            float spawnX;
+            if (spawnLineMarkerX != null && spawnLineMarkerX.parent == noteTrack) 
             {
-                hitX = spawnLineMarkerX.anchoredPosition.x;
+                spawnX = spawnLineMarkerX.anchoredPosition.x;
             }
             else
             {
-                // Fallback if hitLineMarkerX isn't set up correctly
-                hitX = 0; // Center of the track
+                // Fallback if spawnLineMarkerX isn't set up correctly
+                spawnX = noteTrack.rect.width / 2; // Right edge of the track
             }
 
             float yPos = 0f;
@@ -498,27 +509,24 @@ public class NoteScroller : MonoBehaviour
 
             if (topLaneMarker != null && bottomLaneMarker != null)
             {
-                Vector3 noteTrackPivotWorldPos = noteTrack.position;
-                Vector3 topMarkerWorldPos = topLaneMarker.position;
-                Vector3 bottomMarkerWorldPos = bottomLaneMarker.position;
-                Vector3 topReferenceWorld = new Vector3(noteTrackPivotWorldPos.x, topMarkerWorldPos.y, noteTrackPivotWorldPos.z);
-                Vector3 bottomReferenceWorld = new Vector3(noteTrackPivotWorldPos.x, bottomMarkerWorldPos.y, noteTrackPivotWorldPos.z);
-                float minY_local = noteTrack.InverseTransformPoint(bottomReferenceWorld).y;
-                float maxY_local = noteTrack.InverseTransformPoint(topReferenceWorld).y;
+                // Simpler approach using direct RectTransform values
+                float topY = topLaneMarker.anchoredPosition.y;
+                float bottomY = bottomLaneMarker.anchoredPosition.y;
                 
-                if (maxY_local < minY_local)
+                // Make sure top is higher than bottom
+                if (topY < bottomY)
                 {
-                    (minY_local, maxY_local) = (maxY_local, minY_local); 
+                    (topY, bottomY) = (bottomY, topY);
                 }
 
                 if (numLanes > 1)
                 {
                     int clampedPitchLevel = Mathf.Clamp(pitchLevel, 0, numLanes - 1);
-                    yPos = Mathf.Lerp(minY_local, maxY_local, (float)clampedPitchLevel / (numLanes - 1));
+                    yPos = Mathf.Lerp(bottomY, topY, (float)clampedPitchLevel / (numLanes - 1));
                 }
                 else 
                 {
-                    yPos = (minY_local + maxY_local) / 2f;
+                    yPos = (bottomY + topY) / 2f;
                 }
             }
             else
@@ -530,7 +538,7 @@ public class NoteScroller : MonoBehaviour
                 }
             }
 
-            noteRectTransform.anchoredPosition = new Vector2(hitX, yPos);
+            noteRectTransform.anchoredPosition = new Vector2(spawnX, yPos);
             
             TextMeshProUGUI tm1 = null, tm2 = null;
             TextMeshProUGUI[] texts = newNoteObject.GetComponentsInChildren<TextMeshProUGUI>(true); 
